@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">UnBind</string>
+    <string name="title_activity_maps">UnBind</string>
+    <string name="str_atv_places">Enter Place Here</string>
+</resources>
