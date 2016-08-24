@@ -6,24 +6,43 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
+
 
         android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:hint="Set Destination Here" />
+            <ph.edu.dlsu.unbind.DelayAutoCompleteTextView
+                android:id="@+id/geo_autocomplete"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="flagNoExtractUi|actionSearch"
+                android:inputType="textCapSentences"
+                android:textColor="#000000"
+                android:background="#FFFFFF"
+                android:hint="@string/map_geo_search_input_hint"
+                android:layout_gravity="center_vertical"
+                android:padding="10dp"
+                android:dropDownWidth="match_parent"
+                android:layout_weight="10"
+                />
 
+        <ImageView
+            android:id="@+id/geo_autocomplete_clear"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_action_remove"
+            android:layout_gravity="center_vertical|end"
+            android:visibility="invisible"
 
+            android:layout_marginEnd="12dp"
+            android:layout_marginRight="12dp"
+            />
         <Button
             android:id="@+id/search_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="onMapSearch"
+            android:layout_gravity="right"
             android:text="Search" />
 
     </LinearLayout>

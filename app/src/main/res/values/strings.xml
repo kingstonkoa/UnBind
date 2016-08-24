@@ -2,4 +2,5 @@
     <string name="app_name">UnBind</string>
     <string name="title_activity_maps">UnBind</string>
     <string name="str_atv_places">Enter Place Here</string>
+    <string name="map_geo_search_input_hint">Enter Destination Here</string>
 </resources>
