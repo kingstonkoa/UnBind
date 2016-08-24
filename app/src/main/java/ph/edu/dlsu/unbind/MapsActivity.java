@@ -1,6 +1,7 @@
 package ph.edu.dlsu.unbind;
 
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -29,10 +30,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -54,6 +61,18 @@ public class MapsActivity extends AppCompatActivity implements
     private Integer THRESHOLD = 2;
     private DelayAutoCompleteTextView geo_autocomplete;
     private ImageView geo_autocomplete_clear;
+
+    private static final LatLng AMSTERDAM = new LatLng(52.37518, 4.895439);
+    private static final LatLng PARIS = new LatLng(48.856132, 2.352448);
+    private static final LatLng FRANKFURT = new LatLng(50.111772, 8.682632);
+    private GoogleMap map;
+    private SupportMapFragment fragment;
+    private LatLngBounds latlngBounds;
+    private Button bNavigation;
+    private Polyline newPolyline;
+    private boolean isTravelingToParis = false;
+    private int width, height;
+    private Location mLastLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,6 +177,18 @@ public class MapsActivity extends AppCompatActivity implements
         /*locationTv.setText("Latitude:" + address.getLatitude() + ", Longitude:"
                 + address.getLongitude());
 */
+        //Dito nagsimula ung gawa path
+        //test
+        if (!isTravelingToParis)
+        {
+            isTravelingToParis = true;
+            findDirections( mLastLocation.getLatitude(), mLastLocation.getLongitude(),latLng.latitude, latLng.longitude, GMapV2Direction.MODE_DRIVING );
+        }
+        else
+        {
+            isTravelingToParis = false;
+            findDirections( mLastLocation.getLatitude(), mLastLocation.getLongitude(),latLng.latitude, latLng.longitude, GMapV2Direction.MODE_DRIVING );
+        }
 
     }
 
@@ -204,7 +235,7 @@ public class MapsActivity extends AppCompatActivity implements
             // TODO: Consider calling
             return;
         }
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
             //place marker at current position
@@ -262,7 +293,55 @@ public class MapsActivity extends AppCompatActivity implements
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
+    public void findDirections(double fromPositionDoubleLat, double fromPositionDoubleLong, double toPositionDoubleLat, double toPositionDoubleLong, String mode)
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(GetDirectionsAsyncTask.USER_CURRENT_LAT, String.valueOf(fromPositionDoubleLat));
+        map.put(GetDirectionsAsyncTask.USER_CURRENT_LONG, String.valueOf(fromPositionDoubleLong));
+        map.put(GetDirectionsAsyncTask.DESTINATION_LAT, String.valueOf(toPositionDoubleLat));
+        map.put(GetDirectionsAsyncTask.DESTINATION_LONG, String.valueOf(toPositionDoubleLong));
+        map.put(GetDirectionsAsyncTask.DIRECTIONS_MODE, mode);
 
+        GetDirectionsAsyncTask asyncTask = new GetDirectionsAsyncTask(this);
+        asyncTask.execute(map);
+    }
+
+    public void handleGetDirectionsResult(ArrayList<LatLng> directionPoints) {
+        PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.BLACK);
+
+        for(int i = 0 ; i < directionPoints.size() ; i++)
+        {
+            rectLine.add(directionPoints.get(i));
+        }
+        if (newPolyline != null)
+        {
+            newPolyline.remove();
+        }
+        newPolyline = mGoogleMap.addPolyline(rectLine);
+        if (isTravelingToParis)
+        {
+            /*latlngBounds = createLatLngBoundsObject(AMSTERDAM, PARIS);
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latlngBounds, 150));*/
+        }
+        else
+        {
+            /*latlngBounds = createLatLngBoundsObject(AMSTERDAM, FRANKFURT);
+            mGoogleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latlngBounds, 150));*/
+        }
+
+    }
+
+    private LatLngBounds createLatLngBoundsObject(LatLng firstLocation, LatLng secondLocation)
+    {
+        if (firstLocation != null && secondLocation != null)
+        {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(firstLocation).include(secondLocation);
+
+            return builder.build();
+        }
+        return null;
+    }
 
 
 

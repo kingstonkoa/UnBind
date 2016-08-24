@@ -20,6 +20,10 @@ android {
     }
 }
 
+android {
+    useLibrary 'org.apache.http.legacy'
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
