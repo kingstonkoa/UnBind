@@ -16,6 +16,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -57,6 +58,7 @@ public class MapsActivity extends AppCompatActivity implements
     private float zoomLevel = 17.0f;
     private Button searchBtn;
     private EditText searchEt;
+    private TextView etaTv;
     private int locationChangeCount = 0;
     private Integer THRESHOLD = 2;
     private DelayAutoCompleteTextView geo_autocomplete;
@@ -79,6 +81,7 @@ public class MapsActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        etaTv = (TextView)findViewById(R.id.etaTV);
         geo_autocomplete_clear = (ImageView) findViewById(R.id.geo_autocomplete_clear);
 
         geo_autocomplete = (DelayAutoCompleteTextView) findViewById(R.id.geo_autocomplete);
@@ -159,6 +162,11 @@ public class MapsActivity extends AppCompatActivity implements
         double home_long = address.getLongitude();
         double home_lat = address.getLatitude();
         latLng = new LatLng(address.getLatitude(), address.getLongitude());
+        Location mDestination = new Location("");
+        mDestination.setLatitude(address.getLatitude());
+        mDestination.setLongitude(address.getLongitude());
+        float distanceInMeters;
+        double ETA;
 
         String addressText = String.format(
                 "%s, %s",
@@ -177,17 +185,43 @@ public class MapsActivity extends AppCompatActivity implements
         /*locationTv.setText("Latitude:" + address.getLatitude() + ", Longitude:"
                 + address.getLongitude());
 */
+        int speedInMeters = 60000;
         //Dito nagsimula ung gawa path
         //test
         if (!isTravelingToParis)
         {
             isTravelingToParis = true;
             findDirections( mLastLocation.getLatitude(), mLastLocation.getLongitude(),latLng.latitude, latLng.longitude, GMapV2Direction.MODE_DRIVING );
+            distanceInMeters =   mLastLocation.distanceTo(mDestination);
+            ETA = distanceInMeters / speedInMeters;
+            System.out.println(ETA + " eta");
+
+            int hours = (int)ETA;
+            float minutesDecimal = (float) ((ETA - hours) * 60);
+            int minutes = (int)minutesDecimal;
+            if(hours > 0)
+            etaTv.setText(hours +" hours and " +minutes + " minutes");
+            else
+                etaTv.setText(minutes + " minutes");
+            Toast.makeText(this, "ETA: " + ETA + " minutes", Toast.LENGTH_SHORT).show();
+            System.out.println(distanceInMeters + "oy");
         }
         else
         {
             isTravelingToParis = false;
             findDirections( mLastLocation.getLatitude(), mLastLocation.getLongitude(),latLng.latitude, latLng.longitude, GMapV2Direction.MODE_DRIVING );
+            distanceInMeters =   mLastLocation.distanceTo(mDestination);
+            ETA = distanceInMeters / speedInMeters;
+            System.out.println(ETA + " eta");
+            int hours = (int)ETA;
+            float minutesDecimal = (float) ((ETA - hours) * 60);
+            int minutes = (int)minutesDecimal;
+            if(hours > 0)
+                etaTv.setText(hours +" hours and " +minutes + " minutes");
+            else
+                etaTv.setText(minutes + " minutes");
+            Toast.makeText(this, "ETA: " + ETA + " minutes", Toast.LENGTH_SHORT).show();
+            System.out.println(distanceInMeters + "oy");
         }
 
     }
@@ -307,7 +341,7 @@ public class MapsActivity extends AppCompatActivity implements
     }
 
     public void handleGetDirectionsResult(ArrayList<LatLng> directionPoints) {
-        PolylineOptions rectLine = new PolylineOptions().width(10).color(Color.BLACK);
+        PolylineOptions rectLine = new PolylineOptions().width(20).color(Color.RED);
 
         for(int i = 0 ; i < directionPoints.size() ; i++)
         {
@@ -317,7 +351,7 @@ public class MapsActivity extends AppCompatActivity implements
         {
             newPolyline.remove();
         }
-        newPolyline = mGoogleMap.addPolyline(rectLine);
+        newPolyline = mGoogleMap.addPolyline(rectLine); // ADD LINE
         if (isTravelingToParis)
         {
             /*latlngBounds = createLatLngBoundsObject(AMSTERDAM, PARIS);
